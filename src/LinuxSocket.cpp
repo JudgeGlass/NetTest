@@ -21,10 +21,17 @@ void LinuxSocket::init_server() {
     std::cerr << "sockopt failed!: " << strerror(errno) << std::endl;
   }
 
-  m_address.sin_family = m_domain_type;
-  m_address.sin_addr.s_addr = INADDR_ANY;
-  m_address.sin_port = htons(m_port);
-  m_address_length = sizeof(m_address);
+  if (m_domain_type == LinuxSocket::IPV6) {
+    m_address6.sin6_family = m_domain_type;
+    m_address6.sin6_addr = in6addr_any;
+    m_address6.sin6_port = htons(m_port);
+    m_address_length = sizeof(m_address6);
+  } else {
+    m_address.sin_family = m_domain_type;
+    m_address.sin_addr.s_addr = INADDR_ANY;
+    m_address.sin_port = htons(m_port);
+    m_address_length = sizeof(m_address);
+  }
 }
 
 void LinuxSocket::socket_write(const void *data, size_t size) {
@@ -65,7 +72,7 @@ void LinuxSocket::socket_recvfrom(void *buffer, const size_t buffer_len,
 
 void LinuxSocket::socket_bind() {
   auto binding = bind((m_is_server) ? m_server_descriptor : m_client_socket,
-                      (struct sockaddr *)&m_address, sizeof(m_address));
+                      get_address(), m_address_length);
   if (binding < 0) {
     std::cerr << "Failed to bind socket!: " << strerror(errno) << std::endl;
   }
@@ -76,9 +83,17 @@ void LinuxSocket::socket_connect(const std::string &dns_address) {
     std::cout << "Failed creating socket!: " << strerror(errno) << std::endl;
   }
 
-  m_address.sin_family = m_domain_type;
-  m_address.sin_port = htons(m_port);
-  m_address.sin_addr.s_addr = INADDR_ANY;
+  if (m_domain_type == LinuxSocket::IPV6) {
+    m_address6.sin6_family = m_domain_type;
+    inet_pton(AF_INET6, dns_address.c_str(), &m_address6.sin6_addr);
+    m_address6.sin6_port = htons(m_port);
+    m_address_length = sizeof(m_address6);
+  } else {
+    m_address.sin_family = m_domain_type;
+    m_address.sin_port = htons(m_port);
+    m_address.sin_addr.s_addr = INADDR_ANY;
+    m_address_length = sizeof(m_address);
+  }
 
   if (m_packet_type == LinuxSocket::UDP) {
     socket_bind();
@@ -88,8 +103,8 @@ void LinuxSocket::socket_connect(const std::string &dns_address) {
       std::cerr << "Invalid address!: " << strerror(errno) << std::endl;
     }
 
-    auto connection_status = connect(
-        m_client_socket, (struct sockaddr *)&m_address, sizeof(m_address));
+    auto connection_status =
+        connect(m_client_socket, get_address(), m_address_length);
     if (connection_status < 0) {
       std::cerr << "Failed connecting to socket!: " << strerror(errno)
                 << std::endl;
@@ -106,9 +121,9 @@ void LinuxSocket::socket_listen(const int max_connections) {
 }
 
 void LinuxSocket::socket_accept() {
-  auto client_status = (m_client_socket = accept(m_server_descriptor,
-                                                 (struct sockaddr *)&m_address,
-                                                 &m_address_length));
+  auto client_status =
+      (m_client_socket =
+           accept(m_server_descriptor, get_address(), &m_address_length));
   if (client_status < 0) {
     std::cout << "Failed accepting incoming connection!: " << strerror(errno)
               << std::endl;
@@ -120,4 +135,11 @@ void LinuxSocket::socket_close() {
     close(m_server_descriptor);
   }
   close(m_client_socket);
+}
+
+struct sockaddr *LinuxSocket::get_address() {
+  if (m_domain_type == LinuxSocket::IPV4) {
+    return (struct sockaddr *)&m_address;
+  }
+  return (struct sockaddr *)&m_address6;
 }

@@ -15,6 +15,7 @@
 class LinuxSocket : public Socket {
 public:
   using SocketAddress = struct sockaddr_in;
+  using SocketAddress6 = struct sockaddr_in6;
 
   const static uint32_t UDP = SOCK_DGRAM;
   const static uint32_t TCP = SOCK_STREAM;
@@ -49,7 +50,11 @@ private:
   uint32_t m_proto{0};
   uint16_t m_port{0};
   SocketAddress m_address;
+  SocketAddress6 m_address6;
   socklen_t m_address_length;
+
+private:
+  struct sockaddr *get_address();
 };
 
 #endif
