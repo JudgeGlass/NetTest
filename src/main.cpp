@@ -6,7 +6,8 @@
 #include "LinuxSocket.hpp"
 
 void server() {
-  LinuxSocket server_socket(LinuxSocket::IPV4, LinuxSocket::TCP, 0, 8080);
+  Socket server_socket =
+      LinuxSocket(LinuxSocket::IPV4, LinuxSocket::TCP, 0, 8080);
   std::string msg = "Hello Socket Server!\n";
   server_socket.init_server();
   server_socket.socket_bind();
@@ -19,7 +20,8 @@ void client() {
   std::string address = "127.0.0.1";
   char buffer[1024];
 
-  LinuxSocket client_socket(LinuxSocket::IPV4, LinuxSocket::TCP, 0, 8080);
+  Socket client_socket =
+      LinuxSocket(LinuxSocket::IPV4, LinuxSocket::TCP, 0, 8080);
   client_socket.socket_connect(address);
 
   client_socket.socket_read(buffer, sizeof(buffer) / sizeof(char) - 1);
