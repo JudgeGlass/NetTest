@@ -18,7 +18,7 @@ void LinuxSocket::init_server() {
   auto sockopt = setsockopt(m_server_descriptor, SOL_SOCKET,
                             SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
   if (sockopt < 0) {
-    std::cerr << "sockopt failed! ERRNO: " << strerror(errno) << std::endl;
+    std::cerr << "sockopt failed!: " << strerror(errno) << std::endl;
   }
 
   m_address.sin_family = m_domain_type;
@@ -30,14 +30,14 @@ void LinuxSocket::init_server() {
 void LinuxSocket::socket_write(const void *data, size_t size) {
   auto write_status = send(m_client_socket, data, size, 0);
   if (write_status < 0) {
-    std::cerr << "Failed wrinting to socket!" << std::endl;
+    std::cerr << "Failed wrinting to socket!: " << strerror(errno) << std::endl;
   }
 }
 
 void LinuxSocket::socket_read(void *buffer, const size_t buffer_len) {
   auto read_status = read(m_client_socket, buffer, buffer_len);
   if (read_status < 0) {
-    std::cerr << "Failed reading socket!" << std::endl;
+    std::cerr << "Failed reading socket!: " << strerror(errno) << std::endl;
   }
 }
 
@@ -45,33 +45,35 @@ void LinuxSocket::socket_bind() {
   auto binding = bind(m_server_descriptor, (struct sockaddr *)&m_address,
                       sizeof(m_address));
   if (binding < 0) {
-    std::cerr << "Failed to bind socket!" << std::endl;
+    std::cerr << "Failed to bind socket!: " << strerror(errno) << std::endl;
   }
 }
 
 void LinuxSocket::socket_connect(const std::string &dns_address) {
   if ((m_client_socket = socket(m_domain_type, m_packet_type, m_proto)) < 0) {
-    std::cout << "Failed creating socket!" << std::endl;
+    std::cout << "Failed creating socket!: " << strerror(errno) << std::endl;
   }
 
   m_address.sin_family = m_domain_type;
   m_address.sin_port = htons(m_port);
 
   if (inet_pton(m_domain_type, dns_address.c_str(), &m_address.sin_addr) <= 0) {
-    std::cerr << "Invalid address!" << std::endl;
+    std::cerr << "Invalid address!: " << strerror(errno) << std::endl;
   }
 
   auto connection_status = connect(
       m_client_socket, (struct sockaddr *)&m_address, sizeof(m_address));
   if (connection_status < 0) {
-    std::cerr << "Failed connecting to socket!" << std::endl;
+    std::cerr << "Failed connecting to socket!: " << strerror(errno)
+              << std::endl;
   }
 }
 
 void LinuxSocket::socket_listen(const int max_connections) {
   auto listening = listen(m_server_descriptor, max_connections);
   if (listening < 0) {
-    std::cerr << "Failed listening to socket!" << std::endl;
+    std::cerr << "Failed listening to socket!: " << strerror(errno)
+              << std::endl;
   }
 }
 
@@ -80,7 +82,8 @@ void LinuxSocket::socket_accept() {
                                                  (struct sockaddr *)&m_address,
                                                  &m_address_length));
   if (client_status < 0) {
-    std::cout << "Failed accepting incoming connection!" << std::endl;
+    std::cout << "Failed accepting incoming connection!: " << strerror(errno)
+              << std::endl;
   }
 }
 
