@@ -9,8 +9,10 @@ include_directories("include")
 # add_compile_options(-fsanitize=address)
 # add_link_options(-fsanitize=address)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O0 -ggdb")
 
 add_executable(NetTest
     src/main.cpp
+    src/Socket.cpp
+    src/LinuxSocket.cpp
 )

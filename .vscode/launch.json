@@ -8,7 +8,7 @@
             "request": "launch",
             "miDebuggerPath": "/usr/bin/gdb",
             "program": "${workspaceFolder}/build/NetTest",
-            //"args": ["arg1", "arg2"],
+            //"args": ["server"],
             "environment": [{ "name": "config", "value": "Debug" }],
             "cwd": "${workspaceFolder}"
         }
