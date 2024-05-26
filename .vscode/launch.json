@@ -1,0 +1,16 @@
+{ 
+   "version": "0.2.0",
+    "configurations": [
+        {
+            "preLaunchTask": "build",
+            "name": "C++ Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "program": "${workspaceFolder}/build/NetTest",
+            //"args": ["arg1", "arg2"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
