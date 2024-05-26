@@ -5,7 +5,7 @@ LinuxSocket::LinuxSocket(const uint32_t domain_type, const uint32_t packet_type,
     : m_domain_type(domain_type), m_packet_type(packet_type), m_proto(proto),
       m_port(port) {}
 
-LinuxSocket::~LinuxSocket() {}
+LinuxSocket::~LinuxSocket() { socket_close(); }
 
 void LinuxSocket::init_server() {
   m_is_server = true;
